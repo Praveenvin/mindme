@@ -1,48 +1,74 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from transformers import pipeline
+"""
+Chatbot utility for Mind Me mental health platform
+Provides sentiment-based responses for user interactions
+"""
 
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+class MindMeChatbot:
+    """Simple chatbot for mental health support using sentiment analysis"""
+    
+    def __init__(self):
+        self.positive_responses = [
+            "That's wonderful! Keep up that positive energy.",
+            "I'm glad to hear you're doing well!",
+            "That's excellent news! Keep taking care of yourself.",
+            "Your positivity is inspiring!",
+        ]
+        
+        self.negative_responses = [
+            "I'm sorry you're feeling this way. It's okay to have difficult days.",
+            "Remember, challenging times are temporary. You've got this!",
+            "It's important to acknowledge your feelings. Consider taking a break.",
+            "Would you like to try some stress-relief activities? We have music and games.",
+        ]
+        
+        self.neutral_responses = [
+            "I'm here to listen and support you. Can you tell me more?",
+            "Thank you for sharing. How are you feeling today?",
+            "I'm interested in understanding your feelings better. What's on your mind?",
+            "Let's explore how you're feeling. What would help you right now?",
+        ]
+        
+        self.keywords = {
+            'positive': ['happy', 'great', 'wonderful', 'excellent', 'good', 'amazing', 'fantastic', 'love', 'enjoy', 'excited'],
+            'negative': ['sad', 'depressed', 'anxious', 'stressed', 'worried', 'bad', 'terrible', 'hate', 'angry', 'frustrated'],
+        }
+    
+    def analyze_sentiment(self, user_input):
+        """Analyze sentiment of user input (simple keyword-based approach for MVP)"""
+        text = user_input.lower()
+        
+        for keyword in self.keywords['positive']:
+            if keyword in text:
+                return 'POSITIVE'
+        
+        for keyword in self.keywords['negative']:
+            if keyword in text:
+                return 'NEGATIVE'
+        
+        return 'NEUTRAL'
+    
+    def get_response(self, user_input):
+        """Generate chatbot response based on user input sentiment"""
+        if not user_input or not user_input.strip():
+            return "I'm here to help. What's on your mind?"
+        
+        sentiment = self.analyze_sentiment(user_input)
+        
+        import random
+        
+        if sentiment == 'POSITIVE':
+            return random.choice(self.positive_responses)
+        elif sentiment == 'NEGATIVE':
+            return random.choice(self.negative_responses)
+        else:
+            return random.choice(self.neutral_responses)
 
-# Load a pre-trained model and tokenizer from Hugging Face
-nlp = pipeline("text-classification", model="distilbert-base-uncased-finetuned-sst-2-english")
 
-def get_response(user_input):
-    # Use the model to classify the sentiment of the input
-    result = nlp(user_input)
-    sentiment = result[0]['label']
+# Initialize chatbot instance
+chatbot = MindMeChatbot()
 
-    # Generate a response based on the sentiment
-    if sentiment == 'POSITIVE':
-        return "That's great to hear! Keep up the positive outlook."
-    elif sentiment == 'NEGATIVE':
-        return "I'm sorry to hear that. It's okay to have off days. Take some time for self-care."
-    else:
-        return "I'm here to help with mental health concerns. Can you tell me more about how you're feeling?"
 
-@app.route('/query', methods=['POST'])
-def query():
-    request_data = request.get_json()
-    input_text = request_data.get('text')
+def chat_with_user(user_message):
+    """Public function to get chatbot response"""
+    return chatbot.get_response(user_message)
 
-    if not input_text:
-        return jsonify({'error': 'No input text provided'}), 400
-
-    fulfillment = get_response(input_text)
-
-    response = jsonify({
-        'input_text': input_text,
-        'fulfillment': fulfillment
-    })
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-
-    return response
-
-@app.route('/')
-def home():
-    return "Welcome to the MindMe Assistant! Use the /query endpoint to interact with the chatbot."
-
-if __name__ == '__main__':
-    app.run(debug=True)

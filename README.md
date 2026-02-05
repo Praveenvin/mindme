@@ -28,7 +28,7 @@ Mind Me is an innovative platform designed to help individuals with mental distr
 1. Clone the repository:
    ```sh
    git clone https://github.com/Praveenvin/mindme.git
-   cd mindme-1
+   cd mindme
    ```
 
 2. Create a virtual environment:
