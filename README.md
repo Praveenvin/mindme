@@ -20,11 +20,11 @@ Mind Me is an innovative platform designed to help individuals with mental distr
 ## Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/me-sanath/mindme-tjhacks.git
+   git clone https://github.com/Praveenvin/mindme.git
    ```
 2. Navigate to the project directory:
    ```sh
-   cd mindme-tjhacks
+   cd mindme
    ```
 3. Install dependencies:
    ```sh
